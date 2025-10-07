@@ -94,6 +94,8 @@ The application's architecture separates the user interface from heavy processin
 
 The translation overlay will appear on top of the target window, and a small control panel with pause (⏸) and refresh (↻) buttons will appear in the top-right corner of your screen.
 
+> **Note:** For the translation to work correctly, the target window must remain visible and at the front. If it is minimized or fully covered by another window, the translation will pause or show incorrect results.
+
 ---
 
 ## ⚙️ Configuration
