@@ -44,7 +44,7 @@ TRANSLATION_WORKER_COUNT = 4
 # -- Detection Settings --
 # How much the screen must change (in percent) to trigger a new translation.
 # Lower is more sensitive but uses more resources.
-CHANGE_THRESHOLD_PERCENT = 3
+CHANGE_THRESHOLD_PERCENT = 0.1
 
 # -- Tesseract Path (Automatic path finding is now default) --
 # The script will try to find Tesseract automatically. If it fails, set the path
