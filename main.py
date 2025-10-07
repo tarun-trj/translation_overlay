@@ -49,7 +49,7 @@ CHANGE_THRESHOLD_PERCENT = 0.1
 # -- Tesseract Path (Automatic path finding is now default) --
 # The script will try to find Tesseract automatically. If it fails, set the path
 # manually here. Example: r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-TESSERACT_MANUAL_PATH = r"D:\APPS\code_libs\tesseract\tesseract.exe"
+TESSERACT_MANUAL_PATH = None
 
 # -- Debugging --
 DEBUG_MODE = False  # Set to True to save debug images and show detailed output
