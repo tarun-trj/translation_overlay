@@ -1,7 +1,6 @@
 # 🌐 Real-Time Screen Translator
 
 ![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 
 A high-performance, on-screen translator for Windows that captures a selected application window, recognizes text using OCR, and overlays the translation in real-time.
@@ -125,7 +124,3 @@ You can customize the translator's behavior by editing the `USER SETTINGS` secti
 -   **Incorrect or No Translations**
     -   Ensure the text in the target window is clear and legible. OCR works best on clean, high-contrast text.
     -   Verify that the `SOURCE_LANGUAGE` and `OCR_LANGUAGE` settings in `main.py` correctly match the on-screen language.
-
-## 📜 License
-
-Distributed under the MIT License. See the `LICENSE` file for more information.
