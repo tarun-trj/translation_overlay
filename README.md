@@ -15,9 +15,12 @@ This tool is designed for performance, using a **multi-process architecture** to
 -   ⚡ **High Performance**: Utilizes multithreading for screen capture and multiprocessing for OCR/translation to ensure a smooth, non-blocking experience.
 -   🧠 **Parallel Processing**: Translates multiple text blocks simultaneously using a process pool for significantly faster results.
 -   🎯 **Windowed Capture**: Select any open application window to translate.
--   -   **Interactive Controls**: A simple floating overlay provides one-click controls to pause/resume (⏸/▶) translation or force a manual refresh (↻).
+-   🌍 **Multi-Language Support**: Choose from multiple source languages (Japanese, Korean, Chinese Simplified, Chinese Traditional) via an intuitive dropdown menu.
+-   🤖 **Smart Language Detection**: Automatically detects the language of each text block and only translates content matching your selected source language.
+-   ⏸️ **Interactive Controls**: A simple floating overlay provides one-click controls to pause/resume (⏸/▶) translation or force a manual refresh (↻).
 -   🧰 **Dynamic & Configurable**: Automatically finds your Tesseract installation and includes clear settings for language, performance, and sensitivity.
 -   🪟 **Intelligent Overlay**: A transparent, click-through overlay that automatically resizes text to fit within the original text block boundaries. The overlay itself is excluded from screen captures, so it won't be re-translated.
+-   🔍 **Debug Mode**: Optional visualization of recognized text boundaries with red outlines for troubleshooting.
 
 ---
 
@@ -25,11 +28,12 @@ This tool is designed for performance, using a **multi-process architecture** to
 
 The application's architecture separates the user interface from heavy processing tasks, ensuring the GUI remains responsive at all times.
 
-1.  **Control Panel (Main UI Thread)**: Built with PyQt6, the main window handles selecting the target window and starting/stopping the translation process.
+1.  **Control Panel (Main UI Thread)**: Built with PyQt6, the main window handles language selection, target window selection, and starting/stopping the translation process.
 2.  **Capture & Detection Thread (`TranslationWorker`)**: Runs in the background, continuously capturing screenshots of the selected window, comparing frames to detect visual changes, and avoiding redundant processing when the screen is static.
 3.  **OCR & Translation Subprocess**: To prevent GUI lag, OCR and translation are executed in a separate process.
     -   **OCR Stage**: Tesseract OCR analyzes the captured image to extract text blocks.
-    -   **Parallel Translation Stage**: A `multiprocessing.Pool` translates all found text blocks simultaneously.
+    -   **Language Detection Stage**: Each text block is analyzed using `langdetect` to identify its language, ensuring only matching content is translated.
+    -   **Parallel Translation Stage**: A `multiprocessing.Pool` translates all validated text blocks simultaneously.
 4.  **Overlay Window (`OverlayWindow`)**: The translated text is rendered via a transparent, frameless, click-through PyQt6 window, positioned accurately over the original text locations.
 
 ---
@@ -44,6 +48,7 @@ The application's architecture separates the user interface from heavy processin
 | **Pillow (PIL)**  | Screen capture & image manipulation       |
 | **pytesseract**   | Python wrapper for Tesseract              |
 | **deep-translator** | Handles translation via Google Translate  |
+| **langdetect**    | Automatic language detection for text blocks |
 | **pywin32**       | Windows API access for window management  |
 
 ---
@@ -88,9 +93,11 @@ The application's architecture separates the user interface from heavy processin
     python main.py
     ```
 
-2.  **Select a Window:** Click the "Select a Window to Translate" button and choose your target application from the dropdown list.
+2.  **Select Source Language:** Choose the language you want to translate FROM using the dropdown menu in the control panel.
 
-3.  **Start Translation:** Click "Start Translation."
+3.  **Select a Window:** Click the "Select a Window to Translate" button and choose your target application from the dropdown list.
+
+4.  **Start Translation:** Click "Start Translation."
 
 The translation overlay will appear on top of the target window, and a small control panel with pause (⏸) and refresh (↻) buttons will appear in the top-right corner of your screen.
 
@@ -104,12 +111,25 @@ You can customize the translator's behavior by editing the `USER SETTINGS` secti
 
 | Variable                     | Description                                                                                                                            | Default |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `SOURCE_LANGUAGE`            | Language to translate FROM (e.g., 'ja', 'ko', 'zh-CN'). [See codes](https://py-google-translator.readthedocs.io/en/latest/languages.html). | `'ja'`  |
-| `TARGET_LANGUAGE`            | Language to translate TO (e.g., 'en', 'es', 'fr').                                                                                     | `'en'`  |
-| `OCR_LANGUAGE`               | Tesseract language pack name. Must match the source language (e.g., 'ja' -> 'jpn'). [See names](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-version-4.00.html). | `'jpn'` |
+| `TARGET_LANGUAGE`            | Language to translate TO (e.g., 'en', 'es', 'fr'). [See codes](https://py-google-translator.readthedocs.io/en/latest/languages.html). | `'en'`  |
 | `TRANSLATION_WORKER_COUNT`   | Number of parallel processes for translation. Reduce if you face memory errors.                                                        | `4`     |
-| `CHANGE_THRESHOLD_PERCENT`   | How much the screen must change (%) to trigger a new translation. Lower is more sensitive but uses more resources.                     | `3`     |
+| `CHANGE_THRESHOLD_PERCENT`   | How much the screen must change (%) to trigger a new translation. Lower is more sensitive but uses more resources.                     | `0.1`   |
 | `TESSERACT_MANUAL_PATH`      | Set the full path to `tesseract.exe` if the script can't find it automatically.                                                          | `""`    |
+| `DEBUG_MODE`                 | Set to `True` to save debug images and show detailed output.                                                                          | `False` |
+
+**Note:** Source language and OCR language configurations have been moved to `language_config.py` for better organization. The application now uses a dropdown menu for language selection, eliminating the need to manually edit these settings.
+
+---
+
+## 🌍 Supported Languages
+
+The application currently supports translation from:
+- **Japanese** (日本語)
+- **Korean** (한국어)
+- **Chinese Simplified** (简体中文)
+- **Chinese Traditional** (繁體中文)
+
+Languages are configured in the `language_config.py` file and can be easily extended by adding new entries with the appropriate Google Translate language code and Tesseract OCR language pack name.
 
 ---
 
@@ -125,4 +145,16 @@ You can customize the translator's behavior by editing the `USER SETTINGS` secti
 
 -   **Incorrect or No Translations**
     -   Ensure the text in the target window is clear and legible. OCR works best on clean, high-contrast text.
-    -   Verify that the `SOURCE_LANGUAGE` and `OCR_LANGUAGE` settings in `main.py` correctly match the on-screen language.
+    -   Verify that you've selected the correct source language from the dropdown menu that matches the on-screen content.
+    -   Enable "Show original text boxes (red outline)" to visualize what text is being detected by the OCR engine.
+
+-   **Only Some Text is Translated**
+    -   The application uses automatic language detection to filter text blocks. Only text that matches your selected source language will be translated.
+    -   Enable `DEBUG_MODE` in the settings to see which text blocks are being skipped and why.
+    -   Mixed-language content may result in some blocks being skipped if they don't match the selected source language.
+
+---
+
+## 📝 Additional Files
+
+-   **`language_config.py`**: Contains the configuration for supported languages, including their Google Translate codes and Tesseract OCR language pack names. Edit this file to add support for additional languages.
